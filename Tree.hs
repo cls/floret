@@ -18,14 +18,15 @@ label f (Branch l _ _ r) = let l' = label f l
                            in Branch l' (size l') (size r') r'
 
 find :: (Ord a, Semiring a) => a -> Row a -> Tree c (Matrix a) -> Column a -> Maybe c
-find k a (Leaf c n)       z = let i = a <:> booleanise (n </> z)
-                              in if i >= k then Just c
-                                           else Nothing
+find k a (Leaf c m)       z = let am = a <\> m
+                                  i = am <:> booleanise z
+                              in if k < i then Just c
+                                          else Nothing
 find k a (Branch l m n r) z = let am = a <\> m
                                   nz = n </> z
                                   i = am <:> booleanise nz
-                              in if i >= k then find k a l nz
-                                           else find k am r z
+                              in if k < i then find k a l nz
+                                          else find k am r z
 
 booleanise :: (Eq a, Semiring a) => Column a -> Column a
 booleanise (Column xs) = Column (map bool xs)
