@@ -28,7 +28,7 @@ find k a (Branch l m n r) z = let am = a <\> m
                               in if k < i then find k a l nz
                                           else find k am r z
 
-booleanise :: (Eq a, Semiring a) => Column a -> Column a
+booleanise :: (Eq a, Semiring a, Semiring b) => Column a -> Column b
 booleanise (Column xs) = Column (map bool xs)
   where
     bool x = if x == zero then zero else unit -- is this a hack?
