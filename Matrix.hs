@@ -3,6 +3,7 @@ where
 
 import Algebra
 
+import Data.Coerce (coerce)
 import Data.List (transpose)
 
 infixr 5 <:>
@@ -11,22 +12,18 @@ infixr 6 </>
 
 -- Vectors and matrices.
 
-newtype Row a = Row { getRow :: [a] }
-newtype Column a = Column { getColumn :: [a] }
-newtype Matrix a = Matrix [Row a]
+newtype Row a = Row [a]
+newtype Column a = Column [a]
+newtype Matrix a = Matrix { rows :: [[a]] }
 
 mapRows :: (Row a -> b) -> Matrix a -> Column b
-mapRows f (Matrix rows) = Column (map f rows)
+mapRows f = Column . map (f . Row) . rows
 
 mapCols :: (Column a -> b) -> Matrix a -> Row b
-mapCols f (Matrix rows) = Row $ map (f . Column) $ transpose $ map getRow rows
+mapCols f = Row . map (f . Column) . transpose . rows
 
-prettyMatrix :: Show a => Matrix a -> String
-prettyMatrix (Matrix rows) = unlines $ map (bracket . unwords . map (fill . show) . getRow) rows
-  where
-    mx = maximum $ concatMap (\(Row xs) -> map (length . show) xs) rows
-    fill str = replicate (mx - length str) ' ' ++ str
-    bracket str = "( " ++ str ++ " )"
+mapElems :: (a -> b) -> Matrix a -> Matrix b
+mapElems f = Matrix . map (map f) . rows
 
 -- Multiplication of vectors and matrices over a semiring.
 
@@ -40,4 +37,4 @@ v <\> m = mapCols (v <:>) m
 m </> v = mapRows (<:> v) m
 
 instance Semiring a => Semigroup (Matrix a) where
-  m <> n = let Column mn = mapRows (<\> n) m in Matrix mn
+  m <> n = coerce $ mapRows (<\> n) m
