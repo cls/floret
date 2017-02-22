@@ -7,14 +7,14 @@ import Matrix
 import Prelude hiding (null, last)
 
 data Regexp c a = Weight a
-                | Letter (c -> a)
+                | Letter c
                 | Choice (Regexp c a) (Regexp c a)
                 | Concat (Regexp c a) (Regexp c a)
                 | Kleene (Regexp c a)
 
-letters :: Regexp c a -> [c -> a]
+letters :: Regexp c a -> [c]
 letters (Weight _)   = []
-letters (Letter f)   = [f]
+letters (Letter x)   = [x]
 letters (Choice r s) = letters r ++ letters s
 letters (Concat r s) = letters r ++ letters s
 letters (Kleene s)   = letters s
@@ -44,7 +44,7 @@ last r@(Kleene s) = map (<.> null r) (last s)
 
 follow :: StarSemiring a => Regexp c a -> Matrix a
 follow (Weight _)   = []
-follow (Letter f)   = [[unit]]
+follow (Letter _)   = [[unit]]
 follow (Choice r s) = let r' = follow r
                           s' = follow s
                       in blockAD r' s'
@@ -62,7 +62,8 @@ initial r = unit : map (const zero) (letters r)
 final :: StarSemiring a => Regexp c a -> Column a
 final r = null r : last r
 
-delta :: StarSemiring a => Regexp c a -> c -> Matrix a
-delta r c = map delta' (first r : follow r)
-  where
-    delta' = (zero :) . zipWith ((<.>) . ($ c)) (letters r)
+delta :: (Eq c, StarSemiring a) => Regexp c a -> c -> Matrix a
+delta r = let m = first r : follow r
+              xs = letters r
+          in \y -> let weigh = zipWith (<.>) (map (fromBool . (== y)) xs)
+                   in mapRows ((zero :) . weigh) m
