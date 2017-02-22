@@ -1,10 +1,6 @@
 module Algebra
 where
 
-infixl 7 <>
-infixl 8 <+>
-infixl 9 <.>
-
 -- Semigroups.
 
 class Semigroup a where

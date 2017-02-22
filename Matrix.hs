@@ -7,11 +7,6 @@ import Algebra
 import Data.Coerce (coerce)
 import Data.List (transpose)
 
-infixr 5 <:> -- vector inner product
-infixr 5 ><  -- vector outer product
-infixl 6 <\> -- row times a matrix
-infixr 6 </> -- matrix times a column
-
 -- Vectors and matrices.
 
 type Row a = [a]

@@ -43,6 +43,6 @@ follow (Choice r s) c = let r' = follow r c
                         in blockAD r' s'
 follow (Concat r s) c = let r' = follow r c
                             s' = follow s c
-                        in blockABD r' ((last r >< first s) <> s') s'
+                        in blockABD r' (last r >< first s <> s') s'
 follow (Kleene s)   c = let s' = follow s c
-                        in zipElemsWith (<+>) s' ((last s >< first s) <> s')
+                        in zipElemsWith (<+>) s' (last s >< first s <> s')
