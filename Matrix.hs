@@ -31,13 +31,16 @@ rows = length
 columns :: Matrix a -> Int
 columns = length . head
 
+row :: Row a -> Matrix a
+row = return
+
+column :: Column a -> Matrix a
+column = map return
+
 -- Multiplication of vectors and matrices over a semiring.
 
 (><) :: Semiring a => Column a -> Row a -> Matrix a
 v >< w = column v <> row w
-  where
-    row    = return
-    column = map return
 
 (<:>) :: Semiring a => Row a -> Column a -> a
 v <:> w = foldr (<+>) zero $ zipWith (<.>) v w
