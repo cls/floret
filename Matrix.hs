@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances #-}
 module Matrix
 where
 
@@ -6,29 +7,45 @@ import Algebra
 import Data.Coerce (coerce)
 import Data.List (transpose)
 
-infixr 5 <:>
-infixl 6 <\>
-infixr 6 </>
+infixr 5 <:> -- vector inner product
+infixr 5 ><  -- vector outer product
+infixl 6 <\> -- row times a matrix
+infixr 6 </> -- matrix times a column
 
 -- Vectors and matrices.
 
-newtype Row a = Row [a]
-newtype Column a = Column [a]
-newtype Matrix a = Matrix { rows :: [[a]] }
+type Row a = [a]
+type Column a = [a]
+type Matrix a = [[a]]
 
 mapRows :: (Row a -> b) -> Matrix a -> Column b
-mapRows f = Column . map (f . Row) . rows
+mapRows f = map f
 
 mapCols :: (Column a -> b) -> Matrix a -> Row b
-mapCols f = Row . map (f . Column) . transpose . rows
+mapCols f = map f . transpose
 
 mapElems :: (a -> b) -> Matrix a -> Matrix b
-mapElems f = Matrix . map (map f) . rows
+mapElems f = map (map f)
+
+zipElemsWith :: (a -> b -> c) -> Matrix a -> Matrix b -> Matrix c
+zipElemsWith f = zipWith (zipWith f)
+
+rows :: Matrix a -> Int
+rows = length
+
+columns :: Matrix a -> Int
+columns = length . head
 
 -- Multiplication of vectors and matrices over a semiring.
 
+(><) :: Semiring a => Column a -> Row a -> Matrix a
+v >< w = column v <> row w
+  where
+    row    = return
+    column = map return
+
 (<:>) :: Semiring a => Row a -> Column a -> a
-Row v <:> Column w = foldr (<+>) zero $ zipWith (<.>) v w
+v <:> w = foldr (<+>) zero $ zipWith (<.>) v w
 
 (<\>) :: Semiring a => Row a -> Matrix a -> Row a
 v <\> m = mapCols (v <:>) m
@@ -37,4 +54,16 @@ v <\> m = mapCols (v <:>) m
 m </> v = mapRows (<:> v) m
 
 instance Semiring a => Semigroup (Matrix a) where
-  m <> n = coerce $ mapRows (<\> n) m
+  m <> n = mapRows (<\> n) m
+
+-- Miscellaneous functions for constructing matrices.
+
+blockAD :: Semiring a => Matrix a -> Matrix a -> Matrix a
+blockAD a d = let as = map (++ replicate (columns d) zero) a
+                  ds = map (replicate (columns a) zero ++) d
+              in as ++ ds
+
+blockABD :: Semiring a => Matrix a -> Matrix a -> Matrix a -> Matrix a
+blockABD a b d = let abs = zipWith (++) a b
+                     ds  = map (replicate (columns a) zero ++) d
+                 in abs ++ ds
