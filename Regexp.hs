@@ -50,9 +50,9 @@ follow (Choice r s) = let r' = follow r
                       in blockAD r' s'
 follow (Concat r s) = let r' = follow r
                           s' = follow s
-                      in blockABD r' (last r >< first s <> s') s'
+                      in blockABD r' (last r >< first s <.> s') s'
 follow (Kleene s)   = let s' = follow s
-                      in zipElemsWith (<+>) s' (last s >< first s <> s')
+                      in s' <+> (last s >< first s <.> s')
 
 -- Glushkov automata as matrices over a semiring.
 
