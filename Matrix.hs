@@ -1,3 +1,4 @@
+{- Copyright (C) 2017  Connor Lane Smith -}
 {-# LANGUAGE FlexibleInstances #-}
 module Matrix
 where
