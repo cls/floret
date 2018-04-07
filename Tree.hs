@@ -24,13 +24,17 @@ label f (Branch l _ _ r) = let l' = label f l
 
 type MatrixTree c a = Tree c (Product (Matrix a))
 
+-- TODO: What properties does this require of a semiring?
+truncateDot :: (Ord a, Semiring a) => Row a -> Column a -> a
+truncateDot a z = foldr (<+>) zero $ zipWith (\x y -> x `min` (x <.> y)) a z
+
 find :: (Ord a, Semiring a) => a -> Row a -> MatrixTree c a -> Column a -> Maybe c
 find k a (Leaf c m)       z = let am = a <\> getProduct m
-                                  i = am <:> map toBool z
-                              in if k < i then Just c
-                                          else Nothing
+                                  i = truncateDot am z
+                              in if k <= i then Just c
+                                           else Nothing
 find k a (Branch l m n r) z = let am = a <\> getProduct m
                                   nz = getProduct n </> z
-                                  i = am <:> map toBool nz
-                              in if k < i then find k a l nz
-                                          else find k am r z
+                                  i = truncateDot am nz
+                              in if k <= i then find k a l nz
+                                           else find k am r z

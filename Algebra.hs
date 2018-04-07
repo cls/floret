@@ -44,10 +44,3 @@ instance Semiring Bool where
 
 instance StarSemiring Bool where
   star = const True
-
-fromBool :: Semiring a => Bool -> a
-fromBool False = zero
-fromBool True  = unit
-
-toBool :: (Eq a, Semiring a, Semiring b) => a -> b
-toBool = fromBool . (/= zero)
