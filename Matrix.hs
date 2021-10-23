@@ -5,7 +5,6 @@ where
 
 import Algebra
 
-import Data.Coerce (coerce)
 import Data.List (transpose)
 
 -- Vectors and matrices.
