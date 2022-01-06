@@ -32,7 +32,10 @@ class Ringoid a => Semiring a where
 class Semiring a => StarSemiring a where
   star :: a -> a
 
--- Boolean algebra forms a star-semiring.
+class StarSemiring a => Kleene a where
+  leq :: a -> a -> Bool
+
+--- Boolean algebra forms a Kleene algebra.
 
 instance Ringoid Bool where
   (<+>) = (||)
@@ -44,3 +47,6 @@ instance Semiring Bool where
 
 instance StarSemiring Bool where
   star = const True
+
+instance Kleene Bool where
+  leq = (<=)
